@@ -11,6 +11,11 @@ describe "Logger.new" do
     File.unlink(@file_path) if File.exists?(@file_path)
   end
   
+  it "raises an ArgumentError when given more or less than 1 argument" do
+    lambda { Logger.new }.should.raise ArgumentError
+    lambda { Logger.new(@log_file, @log_file) }.should.raise ArgumentError
+  end
+  
   it "receives a logging device as first argument" do
     l = Logger.new(@log_file)
     l.add(Logger::WARN, "Test message")

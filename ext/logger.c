@@ -27,6 +27,10 @@ mr_logger_allocate(VALUE klass, SEL sel)
 static VALUE
 mr_logger_initialize(VALUE self, SEL sel, int argc, VALUE *argv)
 {
+    if (argc != 1) {
+      rb_raise(rb_eArgError, "wrong number of arguments (%d for 1)", argc);
+    }
+    
     struct mr_logger *logger;
     Data_Get_Struct(self, struct mr_logger, logger);
     
