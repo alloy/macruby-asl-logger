@@ -41,7 +41,7 @@ mr_logger_initialize(VALUE self, SEL sel, int argc, VALUE *argv)
     VALUE io = argv[0];
     rb_io_t *io_struct = ExtractIOStruct(io);
     if (asl_add_log_file(logger->asl_client, io_struct->fd) == 0) {
-      printf("success!\n");
+      // printf("success!\n");
     }
     
     return self;
@@ -50,7 +50,6 @@ mr_logger_initialize(VALUE self, SEL sel, int argc, VALUE *argv)
 void
 mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
 {
-  printf("add!\n");
   struct mr_logger *logger;
   Data_Get_Struct(self, struct mr_logger, logger);
   
