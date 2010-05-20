@@ -1,6 +1,8 @@
+#include <fcntl.h>
+#include <asl.h>
+
 #include "ruby/ruby.h"
 #include "ruby/io.h"
-#include <asl.h>
 
 VALUE cLogger;
 
@@ -40,6 +42,13 @@ mr_logger_initialize(VALUE self, SEL sel, int argc, VALUE *argv)
     logger->asl_client = asl_open(NULL, "com.apple.console", LoggerDefaultASLOptions);
     
     VALUE io = argv[0];
+    if (rb_respond_to(io, rb_intern("write")) == Qfalse || rb_respond_to(io, rb_intern("close")) == Qfalse) {
+      // TODO: currently I just assume it's a string if it's not an IO object
+      const char *fname = rb_str_cstr(io);
+      int mode = O_WRONLY | O_APPEND;
+      int fd = open(fname, mode);
+      io = rb_io_fdopen(fd, mode, fname);
+    }
     logger->file_descriptor = io;
     
     if (asl_add_log_file(logger->asl_client, ExtractIOStruct(io)->fd) == 0) {

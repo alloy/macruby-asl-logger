@@ -16,12 +16,21 @@ describe "Logger.new" do
     lambda { Logger.new(@log_file, @log_file) }.should.raise ArgumentError
   end
   
-  it "receives a logging device as first argument" do
+  it "accepts a logging device as the first argument" do
     l = Logger.new(@log_file)
     l.add(Logger::WARN, "Test message")
     
     @log_file.rewind
     strip_metadata(@log_file.readline).should == "<Warning>: Test message\n"
-    # l.close
+    l.close
+  end
+  
+  it "accepts a path to a log file as the first argument" do
+    l = Logger.new(@file_path)
+    l.add(Logger::WARN, "Test message")
+    
+    @log_file.rewind
+    strip_metadata(@log_file.readline).should == "<Warning>: Test message\n"
+    l.close
   end
 end
