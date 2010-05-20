@@ -6,7 +6,8 @@ VALUE cLogger;
 
 struct mr_logger {
   aslclient asl_client;
-  VALUE file_descriptors;
+  VALUE file_descriptor;
+  // VALUE file_descriptors;
 };
 
 uint32_t LoggerDefaultASLOptions = ASL_OPT_NO_DELAY | ASL_OPT_STDERR | ASL_OPT_NO_REMOTE;
@@ -18,7 +19,7 @@ mr_logger_allocate(VALUE klass, SEL sel)
     struct mr_logger *logger;
     
     obj = Data_Make_Struct(klass, struct mr_logger, NULL, NULL, logger);
-    logger->file_descriptors = rb_ary_new();
+    // logger->file_descriptors = rb_ary_new();
     
     return obj;
 }
@@ -39,12 +40,23 @@ mr_logger_initialize(VALUE self, SEL sel, int argc, VALUE *argv)
     logger->asl_client = asl_open(NULL, "com.apple.console", LoggerDefaultASLOptions);
     
     VALUE io = argv[0];
-    rb_io_t *io_struct = ExtractIOStruct(io);
-    if (asl_add_log_file(logger->asl_client, io_struct->fd) == 0) {
+    logger->file_descriptor = io;
+    
+    if (asl_add_log_file(logger->asl_client, ExtractIOStruct(io)->fd) == 0) {
       // printf("success!\n");
     }
     
     return self;
+}
+
+void
+mr_logger_close(VALUE self, SEL sel)
+{
+  struct mr_logger *logger;
+  Data_Get_Struct(self, struct mr_logger, logger);
+  
+  rb_io_close(logger->file_descriptor);
+  asl_close(logger->asl_client);
 }
 
 void
@@ -53,13 +65,19 @@ mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
   struct mr_logger *logger;
   Data_Get_Struct(self, struct mr_logger, logger);
   
-  aslmsg msg = asl_new(ASL_TYPE_MSG);
-  asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
-  
-  int ilevel = level == Qnil ? ASL_LEVEL_ALERT : FIX2INT(level);
-  asl_log(logger->asl_client, msg, ilevel, "%s", rb_str_cstr(text));
-  
-  asl_free(msg);
+  // TODO: good way to check if it's open
+  if (ExtractIOStruct(logger->file_descriptor)->write_fd != -1) {
+    aslmsg msg = asl_new(ASL_TYPE_MSG);
+    asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
+    
+    int ilevel = level == Qnil ? ASL_LEVEL_ALERT : FIX2INT(level);
+    asl_log(logger->asl_client, msg, ilevel, "%s", rb_str_cstr(text));
+    
+    asl_free(msg);
+  }
+  else {
+    rb_warn("log writing failed. closed stream");
+  }
 }
 
 void
@@ -87,6 +105,7 @@ Init_logger()
   rb_objc_define_method(cLogger, "initialize", mr_logger_initialize, -1);
   rb_objc_define_method(cLogger, "add", mr_logger_add, 2);
   rb_objc_define_method(cLogger, "debug", mr_logger_debug, 1);
+  rb_objc_define_method(cLogger, "close", mr_logger_close, 0);
   
   rb_define_alias(cLogger, "log", "add");
   
