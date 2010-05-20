@@ -59,8 +59,8 @@ mr_logger_close(VALUE self, SEL sel)
   asl_close(logger->asl_client);
 }
 
-void
-mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
+static void
+logger_add(VALUE self, int level, VALUE text)
 {
   struct mr_logger *logger;
   Data_Get_Struct(self, struct mr_logger, logger);
@@ -69,10 +69,7 @@ mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
   if (ExtractIOStruct(logger->file_descriptor)->write_fd != -1) {
     aslmsg msg = asl_new(ASL_TYPE_MSG);
     asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
-    
-    int ilevel = level == Qnil ? ASL_LEVEL_ALERT : FIX2INT(level);
-    asl_log(logger->asl_client, msg, ilevel, "%s", rb_str_cstr(text));
-    
+    asl_log(logger->asl_client, msg, level, "%s", rb_str_cstr(text));
     asl_free(msg);
   }
   else {
@@ -81,18 +78,15 @@ mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
 }
 
 void
+mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
+{
+  logger_add(self, (level == Qnil ? ASL_LEVEL_ALERT : FIX2INT(level)), text);
+}
+
+void
 mr_logger_debug(VALUE self, SEL sel, VALUE text)
 {
-  struct mr_logger *logger;
-  Data_Get_Struct(self, struct mr_logger, logger);
-  
-  aslmsg msg = asl_new(ASL_TYPE_MSG);
-  asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
-  
-  int level = 7;
-  asl_log(logger->asl_client, msg, level, "%s", rb_str_cstr(text));
-  
-  asl_free(msg);
+  logger_add(self, ASL_LEVEL_DEBUG, text);
 }
 
 void
