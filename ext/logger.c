@@ -1,4 +1,5 @@
 #include "ruby/ruby.h"
+#include "ruby/io.h"
 #include <asl.h>
 
 VALUE cLogger;
@@ -33,7 +34,28 @@ mr_logger_initialize(VALUE self, SEL sel, int argc, VALUE *argv)
     // TODO: add custom facility
     logger->asl_client = asl_open(NULL, "com.apple.console", LoggerDefaultASLOptions);
     
+    VALUE io = argv[0];
+    rb_io_t *io_struct = ExtractIOStruct(io);
+    if (asl_add_log_file(logger->asl_client, io_struct->fd) == 0) {
+      printf("success!\n");
+    }
+    
     return self;
+}
+
+void
+mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
+{
+  printf("add!\n");
+  struct mr_logger *logger;
+  Data_Get_Struct(self, struct mr_logger, logger);
+  
+  aslmsg msg = asl_new(ASL_TYPE_MSG);
+  asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
+  
+  asl_log(logger->asl_client, msg, FIX2INT(level), "%s", rb_str_cstr(text));
+  
+  asl_free(msg);
 }
 
 void
@@ -59,6 +81,7 @@ Init_logger()
   rb_objc_define_method(*(VALUE *)cLogger, "alloc", mr_logger_allocate, 0);
   
   rb_objc_define_method(cLogger, "initialize", mr_logger_initialize, -1);
+  rb_objc_define_method(cLogger, "add", mr_logger_add, 2);
   rb_objc_define_method(cLogger, "debug", mr_logger_debug, 1);
   
   rb_define_const(cLogger, "EMERGENCY", INT2FIX(ASL_LEVEL_EMERG));

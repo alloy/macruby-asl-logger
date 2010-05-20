@@ -10,4 +10,8 @@ class Bacon::Context
   def tmp(name)
     File.join(Dir.tmpdir, name)
   end
+  
+  def strip_metadata(log_line)
+    log_line.sub(/^.+macruby\[\d+\]\s/, '')
+  end
 end
