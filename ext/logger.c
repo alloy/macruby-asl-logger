@@ -88,6 +88,8 @@ Init_logger()
   rb_objc_define_method(cLogger, "add", mr_logger_add, 2);
   rb_objc_define_method(cLogger, "debug", mr_logger_debug, 1);
   
+  rb_define_alias(cLogger, "log", "add");
+  
   rb_define_const(cLogger, "EMERGENCY", INT2FIX(ASL_LEVEL_EMERG));
   rb_define_const(cLogger, "ALERT", INT2FIX(ASL_LEVEL_ALERT));
   rb_define_const(cLogger, "CRITICAL", INT2FIX(ASL_LEVEL_CRIT));
