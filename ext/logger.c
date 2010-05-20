@@ -60,4 +60,18 @@ Init_logger()
   
   rb_objc_define_method(cLogger, "initialize", mr_logger_initialize, -1);
   rb_objc_define_method(cLogger, "debug", mr_logger_debug, 1);
+  
+  rb_define_const(cLogger, "EMERGENCY", INT2FIX(ASL_LEVEL_EMERG));
+  rb_define_const(cLogger, "ALERT", INT2FIX(ASL_LEVEL_ALERT));
+  rb_define_const(cLogger, "CRITICAL", INT2FIX(ASL_LEVEL_CRIT));
+  rb_define_const(cLogger, "ERROR", INT2FIX(ASL_LEVEL_ERR));
+  rb_define_const(cLogger, "WARNING", INT2FIX(ASL_LEVEL_WARNING));
+  rb_define_const(cLogger, "NOTICE", INT2FIX(ASL_LEVEL_NOTICE));
+  rb_define_const(cLogger, "INFO", INT2FIX(ASL_LEVEL_INFO));
+  rb_define_const(cLogger, "DEBUG", INT2FIX(ASL_LEVEL_DEBUG));
+  
+  // Ruby's stdlib Logger constant aliases
+  rb_define_const(cLogger, "UNKNOWN", INT2FIX(ASL_LEVEL_ALERT));
+  rb_define_const(cLogger, "FATAL", INT2FIX(ASL_LEVEL_CRIT));
+  rb_define_const(cLogger, "WARN", INT2FIX(ASL_LEVEL_WARNING));
 }
