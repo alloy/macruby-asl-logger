@@ -57,7 +57,8 @@ mr_logger_add(VALUE self, SEL sel, VALUE level, VALUE text)
   aslmsg msg = asl_new(ASL_TYPE_MSG);
   asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
   
-  asl_log(logger->asl_client, msg, FIX2INT(level), "%s", rb_str_cstr(text));
+  int ilevel = level == Qnil ? ASL_LEVEL_ALERT : FIX2INT(level);
+  asl_log(logger->asl_client, msg, ilevel, "%s", rb_str_cstr(text));
   
   asl_free(msg);
 }

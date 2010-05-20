@@ -40,12 +40,13 @@ describe "Logger#add" do
     strip_metadata(fatal).should == "<Critical>: Fatal message\n"
   end
   
-  # it "receives a message" do
-  #   @logger.log(nil, "test")
-  #   @log_file.rewind
-  #   LoggerSpecs::strip_date(@log_file.readline).should == "ANY -- : test\n"
-  # end
-  # 
+  it "receives a message" do
+    @logger.log(nil, "test")
+    @log_file.rewind
+    # strip_metadata(@log_file.readline).should == "ANY -- : test\n"
+    strip_metadata(@log_file.readline).should == "<Alert>: test\n"
+  end
+  
   # it "receives a program name" do
   #   @logger.log(nil, "test", "TestApp")
   #   @log_file.rewind
