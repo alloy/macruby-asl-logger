@@ -1,0 +1,2 @@
+Currently a very naive implementation, which might be updated to resemble the
+existing Ruby logger API more closely.
