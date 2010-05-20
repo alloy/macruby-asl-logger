@@ -30,8 +30,7 @@ mr_logger_initialize(VALUE self, SEL sel, int argc, VALUE *argv)
     Data_Get_Struct(self, struct mr_logger, logger);
     
     // If no facility is specified, use "com.apple.console"
-    // const char *normalizedFacility = facility ? [facility UTF8String] : "com.apple.console";
-    // logger->asl_client = asl_open( NULL /*ident*/, "com.apple.console", options );
+    // TODO: add custom facility
     logger->asl_client = asl_open(NULL, "com.apple.console", LoggerDefaultASLOptions);
     
     return self;
