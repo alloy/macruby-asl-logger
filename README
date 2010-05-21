@@ -1,2 +1,9 @@
 Currently a very naive implementation, which might be updated to resemble the
 existing Ruby logger API more closely.
+
+Also, this release (0.1.0) probably comes packed with bugs! :P This should be
+considered a pre-release, but I will *not* use those stupid pre-release gem
+version thingies.
+
+This software is available under the Ruby license. (See LICENSE for details.)
+Copyright (c) <2010> Eloy Duran, <eloy.de.enige@gmail.com>
